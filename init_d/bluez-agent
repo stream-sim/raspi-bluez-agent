@@ -1,0 +1,64 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          bluez-agent
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: BlueZ permissive agent
+# Description:
+### END INIT INFO
+
+
+# TODO: run in separate user space
+
+set -e
+
+. /lib/lsb/init-functions
+
+NAME=bluez-agent
+PIDFILE=/var/run/$NAME.pid
+USER=pi
+DAEMON=/home/pi/bluez-agent.py
+DAEMON_OPTS=""
+
+agent_start()
+{
+	start-stop-daemon \
+		--start \
+		--quiet \
+		--make-pidfile \
+		--background \
+		--chuid $USER \
+		--pidfile $PIDFILE \
+		--exec $DAEMON \
+		-- $DAEMON_OPTS
+}
+
+agent_stop()
+{
+	start-stop-daemon \
+		--stop \
+		--quiet \
+		--oknodo \
+		--user $USER \
+		--pidfile $PIDFILE
+}
+
+agent_status()
+{
+	start-stop-daemon \
+		--status \
+		--user $USER \
+		--pidfile $PIDFILE
+}
+
+case "$1" in
+  start)   agent_start ;;
+  stop)    agent_stop ;;
+  restart) agent_stop; agent_start ;; 
+  status)  agent_status ;;
+  *)       echo "Usage: "$1" {start|stop|restart|status}"; exit 1
+esac
